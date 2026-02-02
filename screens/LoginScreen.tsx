@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity, Modal, FlatList } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../config';
+import { formatRut } from '../screens/formatters';
 
 const LoginScreen = ({ navigation }) => {
   const [rut, setRut] = useState('');
@@ -50,10 +51,13 @@ const LoginScreen = ({ navigation }) => {
 
     setLoading(true);
     try {
+      // Limpiamos los puntos antes de enviar (ej: "12.345.678-9" -> "12345678-9")
+      const rutLimpio = rut.replace(/\./g, '');
+
       const response = await fetch(`${API_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rut, contrasena })
+        body: JSON.stringify({ rut: rutLimpio, contrasena })
       });
       const data = await response.json();
       if (response.ok) {
@@ -120,7 +124,7 @@ const LoginScreen = ({ navigation }) => {
         style={styles.input}
         placeholder="RUT"
         value={rut}
-        onChangeText={setRut}
+        onChangeText={(text) => setRut(formatRut(text))}
         autoCapitalize="none"
         keyboardType="default"
       />
